@@ -29,6 +29,10 @@ func mark_reachable_tiles(root : TacticTile, distance):
 func mark_attackable_tiles(root : TacticTile, distance):
 	for t in $Tiles.get_children():
 		t.attackable = t.distance > 0 and t.distance <= distance or t == root
+		
+func mark_healable_tiles(root : TacticTile, distance):
+	for t in $Tiles.get_children():
+		t.healable = t.distance > 0 and t.distance <= distance or t == root
 
 
 func generate_path_stack(to):

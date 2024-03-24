@@ -30,3 +30,4 @@ func set_visibility_of_actions_menu(v, p):
 	if !p : return
 	$HBox/Actions/Move.disabled = !p.can_move
 	$HBox/Actions/Attack.disabled = !p.can_attack
+	$HBox/Actions/Assist.disabled = !p.can_attack

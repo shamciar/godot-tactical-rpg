@@ -12,6 +12,9 @@ var hover_reachable_mat = Utils.create_material("0aa9ffBF")
 var attackable_mat = Utils.create_material("d10000BF")
 var hover_attackable_mat = Utils.create_material("ff4242BF")
 
+var healable_mat = Utils.create_material("00D100BF")
+var hover_healable_mat = Utils.create_material("#26D167BF")
+
 # pathfinding attributes
 var root
 var distance
@@ -19,6 +22,7 @@ var distance
 # tile state
 var reachable = false
 var attackable = false
+var healable = false
 var hover = false
 
 # indicators & stuff
@@ -56,7 +60,9 @@ func _process(_delta):
 		true:
 			if reachable: $Tile.material_override = hover_reachable_mat
 			elif attackable: $Tile.material_override = hover_attackable_mat
+			elif healable: $Tile.material_override = hover_healable_mat
 			else: $Tile.material_override = hover_mat
 		false:
 			if reachable: $Tile.material_override = reachable_mat
 			elif attackable: $Tile.material_override = attackable_mat
+			elif healable: $Tile.material_override = healable_mat

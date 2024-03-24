@@ -3,6 +3,7 @@ class_name TacticsPlayerController
 
 var curr_pawn = null
 var attackable_pawn = null
+var helpable_pawn = null
 
 # wait
 var wait_time = 0
@@ -29,6 +30,7 @@ func configure(my_arena : TacticsArena, my_camera : TacticsCamera, my_control : 
 	ui_control.get_act("Wait").connect("pressed",Callable(self,"player_wants_to_wait"))
 	ui_control.get_act("Cancel").connect("pressed",Callable(self,"player_wants_to_cancel"))
 	ui_control.get_act("Attack").connect("pressed",Callable(self,"player_wants_to_attack"))
+	ui_control.get_act("Assist").connect("pressed",Callable(self,"player_wants_to_assist"))
 
 
 func get_mouse_over_object(lmask):
@@ -60,6 +62,7 @@ func player_wants_to_wait():
 	curr_pawn.do_wait()
 	stage = 0
 func player_wants_to_attack(): stage = 5
+func player_wants_to_assist(): stage = 8
 
 
 # --- aux stage funcs --- #
@@ -140,6 +143,33 @@ func attack_pawn(delta):
 		tactics_camera.target = curr_pawn
 	attackable_pawn = null
 	stage = 0 if !curr_pawn.can_act() else 1
+	
+func display_help_targets():
+	arena.reset()
+	if !curr_pawn: return
+	tactics_camera.target = curr_pawn
+	arena.link_tiles(curr_pawn.get_tile(), 1)
+	arena.mark_healable_tiles(curr_pawn.get_tile(), 1)
+	stage = 9
+	
+func select_pawn_to_help():
+	curr_pawn.display_pawn_stats(true)
+	if helpable_pawn: helpable_pawn.display_pawn_stats(false)
+	var tile = _aux_select_tile()
+	helpable_pawn = tile.get_object_above() if tile else null
+	if helpable_pawn: helpable_pawn.display_pawn_stats(true)
+	if Input.is_action_just_pressed("ui_accept") and tile and tile.healable:
+		tactics_camera.target = helpable_pawn
+		stage = 10
+		
+func help_pawn(delta):
+	if !helpable_pawn: curr_pawn.can_attack = false
+	else:
+		if !curr_pawn.do_help(helpable_pawn, delta): return
+		helpable_pawn.display_pawn_stats(false)
+		tactics_camera.target = curr_pawn
+	helpable_pawn = null
+	stage = 0 if !curr_pawn.can_act() else 1
 
 # --- camera --- #
 func move_camera():
@@ -155,7 +185,7 @@ func camera_rotation():
 func act(delta):
 	move_camera()
 	camera_rotation()
-	ui_control.set_visibility_of_actions_menu(stage in [1,2,3,5,6], curr_pawn)
+	ui_control.set_visibility_of_actions_menu(stage in [1,2,3,5,6,8,9], curr_pawn)
 	match stage:
 		0: select_pawn()
 		1: display_available_actions_for_pawn()
@@ -165,6 +195,9 @@ func act(delta):
 		5: display_attackable_targets()
 		6: select_pawn_to_attack()
 		7: attack_pawn(delta)
+		8: display_help_targets()
+		9: select_pawn_to_help()
+		10: help_pawn(delta)
 
 func _process(_delta):
 	Input.set_mouse_mode(is_joystick)

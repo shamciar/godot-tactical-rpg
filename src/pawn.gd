@@ -126,6 +126,16 @@ func do_attack(a_pawn, delta):
 	wait_delay = 0
 	return true
 
+func do_help(a_pawn, delta):
+	look_at_direction(a_pawn.global_transform.origin-global_transform.origin)
+	if can_attack and wait_delay > MIN_TIME_FOR_ATTACK / 4.0: 
+		a_pawn.curr_health = clamp(a_pawn.curr_health+attack_power, 0, Utils.get_pawn_health(a_pawn.pawn_class))
+		can_attack = false
+	if wait_delay < MIN_TIME_FOR_ATTACK:
+		wait_delay += delta
+		return false
+	wait_delay = 0
+	return true
 
 func reset():
 	can_move = true
